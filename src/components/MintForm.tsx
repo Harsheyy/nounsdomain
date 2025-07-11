@@ -329,7 +329,7 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
           flexWrap="nowrap"
           whiteSpace="nowrap"
         >
-          Strap on the <Image src={"/inline.svg"} height={6} mx={1} mt={1} />,
+          Strap on the <Image src={"/inline.svg"} height={4} mx={1} mt={1} />,
           and enter the Nouniverse
         </Box>
       </Box>
@@ -591,8 +591,8 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
               <Box width="100%" display="flex" flexDirection="row" gap={4} mt={2} justifyContent="center">
                 <Button
                   onClick={() => handlePrimaryName()}
-                  bg="#069420"
-                  _hover={{ bg: "#04891c" }}
+                  bg="#E9C80B"
+                  _hover={{ bg: "#CFB000" }}
                   _active={{ bg: "#037d18" }}
                   color={themeVariables.light}
                   height="45px"
@@ -602,7 +602,7 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
                   className="londrina-solid"
                 >
                   <Box as="span" mr={2} display="inline-block">
-                    <Image src="/inline.svg" height="20px" />
+                    <Image src="/inline.svg" height="100%" width="32px"/>
                   </Box>
                   {primaryNameIndicators.btnLabel}
                 </Button>
@@ -717,7 +717,7 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
                       onSuccessfulMint();
                     }
                   }}
-                  bg="#069420"
+                  bg="#E9C80B"
                   _hover={{ bg: "#04891c" }}
                   _active={{ bg: "#037d18" }}
                   color={themeVariables.light}

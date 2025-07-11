@@ -96,7 +96,7 @@ export const MySubnames = ({ setView }: MySubnamesProps) => {
 
       {/* Search Input - styled to be part of the page */}
       {allSubnames.length > 0 && (
-        <Box width="100%" maxWidth="600px" mb={6} px={{ base: 2, md: 0 }}>
+        <Box width="100%" maxWidth="800px" mb={6} px={{ base: 2, md: 0 }}>
           <Input
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
@@ -117,7 +117,7 @@ export const MySubnames = ({ setView }: MySubnamesProps) => {
         bg="white"
         borderRadius="16px"
         width="100%"
-        maxWidth="600px"
+        maxWidth="1000px"
         overflow="hidden"
         minHeight="300px"
         mx={{ base: 2, md: 0 }}
@@ -157,8 +157,8 @@ export const MySubnames = ({ setView }: MySubnamesProps) => {
                       height={{ base: "44px", md: "48px" }}
                       px={{ base: 4, md: 6 }}
                       color="white"
-                      bg="#069420"
-                      _hover={{ bg: "#04891c" }}
+                      bg="#E9C80B"
+                      _hover={{ bg: "#CFB000" }}
                       className="londrina-solid"
                       fontSize={{ base: "16px", md: "18px" }}
                       borderRadius="12px"
@@ -192,7 +192,7 @@ export const MySubnames = ({ setView }: MySubnamesProps) => {
                       onClick={() => setSearchFilter("")}
                       color="white"
                       bg={themeVariables.accent}
-                      _hover={{ bg: "#dd6b20" }}
+                      _hover={{ bg: "#444444" }}
                       borderRadius="8px"
                       px={6}
                       height="40px"
@@ -302,25 +302,6 @@ export const MySubnames = ({ setView }: MySubnamesProps) => {
         )}
       </Box>
       
-      {/* Info box */}
-      {allSubnames.length > 0 && (
-        <Box
-          mt={6}
-          p={4}
-          bg="#fff3cd"
-          borderRadius="12px"
-          fontSize="14px"
-          textAlign="center"
-          maxWidth="600px"
-          width="100%"
-          border="1px solid #ffeaa7"
-        >
-          <Text mb={0} color="#856404" fontWeight="500">
-            Manage name navigates to ens.app: https://app.ens.domains/{"{name}"}
-          </Text>
-        </Box>
-      )}
-
       <ToastContainer
         toastStyle={{
           backgroundColor: themeVariables.accent,

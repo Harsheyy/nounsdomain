@@ -47,23 +47,23 @@ export const usePrimarySubname = ({ subnames, ownerAddress }: UsePrimarySubnameP
         if (primaryName) {
           const matchingSubname = subnames.find(subname => 
             // subname can be nishantpai.subname.eth we need to match it to nishantpai.eth (primary ens name)
-            subname.label.toLowerCase() === primaryName.toLowerCase().replace(/\.eth$/, "") // Remove .eth for comparison
+            subname.name.toLowerCase() === primaryName.toLowerCase() // Remove .eth for comparison
           );
           
           if (matchingSubname) {
             setPrimarySubname(primaryName);
           } else {
-            // If no exact match, fall back to first subname
-            setPrimarySubname(subnames[0]?.name || null);
+            // If no exact match, fall back to null subname
+            setPrimarySubname(null);
           }
         } else {
-          // If no primary name set, fall back to first subname
-          setPrimarySubname(subnames[0]?.name || null);
+          // If no primary name set, fall back to null subname
+          setPrimarySubname(null);
         }
       } catch (error) {
         console.error("Error fetching primary ENS name:", error);
-        // Fall back to first subname on error
-        setPrimarySubname(subnames[0]?.name || null);
+        // Fall back to null subname on error
+        setPrimarySubname(null);
       } finally {
         setIsLoading(false);
       }

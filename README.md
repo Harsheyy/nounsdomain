@@ -1,7 +1,26 @@
 
-# Subname Minting Website Template
+# Nouns Subname Minting Website
 
-**A customizable template with built-in ENS Subname minting functionality, for quickly launching Subname minting websites.**
+                  ***************************************     **************************************
+                  ***************************************     **************************************
+                  ***************************************     **************************************
+                  *******::::::::::::+%%%%%%%%%%%%*******     ******+::::::::::::#%%%%%%%%%%%%******
+                  *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+                  *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*************************            +@@@@@@@@@@@@******************=            #@@@@@@@@@@@@******
+*************************            +@@@@@@@@@@@@******************=            #@@@@@@@@@@@@******
+*************************            +@@@@@@@@@@@@******************=            #@@@@@@@@@@@@******
+*************************            +@@@@@@@@@@@@******************=            #@@@@@@@@@@@@******
+*******           *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*******           *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*******           *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*******           *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*******           *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*******           *******            +@@@@@@@@@@@@*******     ******=            #@@@@@@@@@@@@******
+*******           *******::::::::::::+%%%%%%%%%%%%*******     ******+::::::::::::#%%%%%%%%%%%%******
+                  ***************************************     **************************************
+                  ***************************************     **************************************
+                  ***************************************     **************************************
 
 ## Features
 
@@ -53,8 +72,8 @@ yarn install
 
 Create .env file in the folder root and add required environment variables
 ```
-VITE_APP_LISTED_NAME=namespace.eth // YOUR listed name
-VITE_APP_LISTING_CHAIN=base // Listed name chain, supported values are [mainnet, base, optimism] or [baseSepolia, sepolia] for testnet
+VITE_APP_LISTED_NAME=⌐◨-◨.eth // YOUR listed name
+VITE_APP_LISTING_CHAIN=mainnet // Listed name chain, supported values are [mainnet, base, optimism] or [baseSepolia, sepolia] for testnet
 VITE_APP_ALCHEMY_TOKEN=dF2... // Optional alchemy token, if not provided, public RPC used by default
 VITE_APP_DEFAULT_AVATAR=https://avatar-uri // Default avatar for minted subnames
 VITE_APP_IS_TESTNET=false // Optional, specify wheter listed names is on mainnet or sepolia
@@ -92,33 +111,6 @@ To lint the project:
 yarn run lint
 ```
 This will run ESLint on the project to check for code quality issues.
-
-## Customizable Design
-
-The design of the website can be customized using the `theme.json` file. This file contains the basic design variables such as colors and background images. You can change these values to match your branding without any technical knowledge.
-
-### Example `theme.json`
-
-```json
-{
-"main": "#0a2943",
-"accent": "#309ae0",
-"light": "#ffffff",
-"dark": "#000000",
-"error": "#d80000",
-"backgroundImage": "<image-url>"
-}
-```
-
-## How to Customize
-
-1. Open the theme.json file.
-2. Change the values of the design variables to match your branding.
-3. Save the file and the changes will be reflected in the website.
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request if you have any improvements or bug fixes.
 
 ## License
 

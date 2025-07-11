@@ -19,7 +19,7 @@ export const Footer = () => {
             <Flex align="center">
               <span>Made with </span>
               <Box ml={1} mt="2px">
-                <Image src={"/favicon.svg"} height={10} alt="Nouns Glasses" />
+                <Image src={"/inline.svg"} height={3} alt="Nouns Glasses" />
               </Box>
             </Flex>
           </Text>
@@ -27,7 +27,7 @@ export const Footer = () => {
 
         <Flex direction="row" gap={4}>
           <Link
-            href="https://twitter.com/nouns"
+            href="https://x.com/nounsDAO"
             target="_blank"
             aria-label="X (Twitter)"
           >
@@ -39,7 +39,7 @@ export const Footer = () => {
             />
           </Link>
           <Link
-            href="https://warpcast.com/"
+            href="https://farcaster.xyz/~/channel/nouns"
             target="_blank"
             aria-label="Farcaster"
           >
