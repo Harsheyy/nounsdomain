@@ -23,6 +23,7 @@
     "@namespacesdk/mint-manager": "^1.0.9",
     "@rainbow-me/rainbowkit": "2.2.1",
     "@tanstack/react-query": "^5.62.7",
+    "@vercel/analytics": "^1.5.0",
     "axios": "^1.7.9",
     "bitcoin-address-validation": "^2.2.3",
     "bootstrap": "^5.3.3",
