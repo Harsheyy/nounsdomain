@@ -42,12 +42,7 @@ const AppContainer = () => {
 
   // Create ticker content with real data
   const tickerItems = recentMints.length > 0 ? recentMints : [
-    "harsh.⌐◨-◨.eth",
-    "123.⌐◨-◨.eth", 
-    "🔥🔥🔥.⌐◨-◨.eth",
-    "volky.⌐◨-◨.eth",
-    "4156.⌐◨-◨.eth",
-    "echo.⌐◨-◨.eth"
+    "Loading..."
   ];
 
   // Duplicate ticker items for seamless loop

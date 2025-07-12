@@ -24,7 +24,7 @@ import { Address, Hash, parseAbi } from "viem";
 import { FaArrowDown, FaArrowUp, FaX } from "react-icons/fa6";
 import { themeVariables } from "@/styles/themeVariables";
 import { toast, ToastContainer } from "react-toastify";
-import { mainnet, sepolia } from "viem/chains";
+import { base, baseSepolia, mainnet, optimism, sepolia } from "viem/chains";
 import { useAppConfig } from "./AppConfigContext";
 import { MintSuccess } from "./MintSuccess";
 
@@ -44,6 +44,23 @@ interface MintFormProps {
 export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
   const { isRenting, listedName, listingChainId, isTestnet, defaultAvatarUri } =
     useAppConfig();
+
+  const getBlockExplorerUrl = () => {
+    switch (listingChainId) {
+      case mainnet.id:
+        return 'https://etherscan.io';
+      case sepolia.id:
+        return 'https://sepolia.etherscan.io';
+      case base.id:
+        return 'https://basescan.org';
+      case baseSepolia.id:
+        return 'https://sepolia.basescan.org';
+      case optimism.id:
+        return 'https://optimistic.etherscan.io';
+      default:
+        return 'https://etherscan.io';
+    }
+  };
 
   const [label, setLabel] = useState("");
   const { address, chainId } = useAccount();
@@ -531,9 +548,8 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
                 Registration in progress
               </Text>
               {txHash && (
-                // fix block explorer
                 <Link
-                  href={`${listedName}/tx/` + txHash}
+                  href={`${getBlockExplorerUrl()}/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   color={themeVariables.accent}
