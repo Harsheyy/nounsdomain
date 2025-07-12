@@ -11,14 +11,12 @@ import { ReferralProvider } from "./components/ReferralContext";
 import { AppContextProvider, useAppConfig } from "./components/AppConfigContext";
 import { ToastContainer } from "react-toastify";
 import { useMintStats } from "./components/useMintStats";
-import { Analytics } from "@vercel/analytics/next"
 
 function App() {
   return (
     <ReferralProvider>
       <WalletConnector>
         <AppContextProvider>
-          <Analytics/>
           <AppContainer/>
         </AppContextProvider>
         <ToastContainer/>
