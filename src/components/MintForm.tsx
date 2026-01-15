@@ -28,6 +28,8 @@ import { base, baseSepolia, mainnet, optimism, sepolia } from "viem/chains";
 import { useAppConfig } from "./AppConfigContext";
 import { MintSuccess } from "./MintSuccess";
 
+import { getSafeAvatarUrl } from "../utils/avatarUtils";
+
 enum RegistrationStep {
   START = 0,
   TX_SENT = 1,
@@ -696,7 +698,7 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
                 position="relative"
               >
                 <Image
-                  src={defaultAvatarUri || "/favicon.svg"}
+                  src={getSafeAvatarUrl(defaultAvatarUri) || "/favicon.svg"}
                   alt="Nouns Avatar"
                   borderRadius="40px"
                   border="2px solid"

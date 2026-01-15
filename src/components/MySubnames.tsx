@@ -20,6 +20,8 @@ import { useSubnames } from "./useSubnames";
 import { usePrimarySubname } from "./usePrimarySubname";
 import noImage from "../assets/no-avatar.png";
 
+import { getSafeAvatarUrl } from "../utils/avatarUtils";
+
 interface MySubnamesProps {
   setView: (view: string) => void;
 }
@@ -229,7 +231,7 @@ export const MySubnames = ({ setView }: MySubnamesProps) => {
                         width={{ base: "100%", sm: "auto" }}
                       >
                         <Image
-                          src={subname.texts?.avatar || noImage}
+                          src={getSafeAvatarUrl(subname.texts?.avatar) || noImage}
                           width={{ base: "32px", md: "40px" }}
                           height={{ base: "32px", md: "40px" }}
                           borderRadius="8px"

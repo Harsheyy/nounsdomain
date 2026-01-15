@@ -20,6 +20,8 @@ const resolverAbi = parseAbi([
 
 
 
+import { getSafeAvatarUrl } from "../utils/avatarUtils";
+
 export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: () => void;}) => {
 
     const { listingChainId } = useAppConfig()
@@ -203,7 +205,7 @@ export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: 
         {/* Header with avatar and name */}
         <Flex alignItems="center" flexDirection="column" mb={{ base: 6, md: 8 }}>
           <Image 
-            src={subname.texts["avatar"]} 
+            src={getSafeAvatarUrl(subname.texts["avatar"])} 
             width={{ base: "60px", md: "80px" }}
             height={{ base: "60px", md: "80px" }}
             borderRadius="12px" 
