@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Address } from "viem";
+import { namehash, normalize } from "viem/ens";
 import { ENS_CLIENT } from "./ens/ens-client";
 import { KnownTexts } from "./records/TextRecords";
 import { KnownAddresses } from "./records/Addresses";
@@ -21,30 +22,31 @@ const fetchL2Subnames = async (owner: string, parentName: string) => {
 
 const fetchL1Subnames = async (owner: Address, parentName: string) => {
   try {
-    const subnamesFetched = await ENS_CLIENT.getSubnames({
-      name: parentName,
-      searchString: "",
-      orderBy: "labelName",
-      orderDirection: "asc",
-      pageSize: 100,
-    });
+    // Use subgraph to find subnames owned by this user
+    const parentNode = namehash(normalize(parentName));
+    const query = `
+      query {
+        domains(where: { parent: "${parentNode}", wrappedOwner: "${owner.toLowerCase()}" }) {
+          labelName
+          name
+          expiryDate
+        }
+      }
+    `;
 
-    if (!subnamesFetched || subnamesFetched.length === 0) {
+    const response = await axios.post("https://api.thegraph.com/subgraphs/name/ensdomains/ens", { query });
+    const filteredSubnames = response.data?.data?.domains || [];
+
+    if (filteredSubnames.length === 0) {
       return [];
     }
-
-    console.log("Fetched subnames:", subnamesFetched, owner);
-
-    const filteredSubnames = subnamesFetched.filter(
-      (subname: any) => subname.wrappedOwner?.toLowerCase() === owner.toLowerCase()
-    );
 
     console.log("Filtered subnames:", filteredSubnames);
 
     const subnamesWithRecords = [];
 
     for (const subname of filteredSubnames) {
-      const subdomain = `${subname.labelName}.${parentName}`;
+      const subdomain = subname.name;
 
       const recordsRes = await ENS_CLIENT.getRecords({
         name: subdomain,
@@ -76,7 +78,7 @@ const fetchL1Subnames = async (owner: Address, parentName: string) => {
       const subnameToReturn: Subname = {
         name: subdomain,
         label: subname.labelName || "",
-        expiry: subname.expiryDate?.value || 0,
+        expiry: subname.expiryDate ? Number(subname.expiryDate) : 0,
         texts: records.texts,
         addresses: records.addresses,
       };

@@ -48,6 +48,10 @@ const AppContainer = () => {
   // Duplicate ticker items for seamless loop
   const duplicatedTicker = [...tickerItems, ...tickerItems];
 
+  // Calculate duration based on number of items to keep speed consistent
+  // Base it on roughly 4 seconds per item, but minimum 40s
+  const animationDuration = `${Math.max(40, tickerItems.length * 4)}s`;
+
   return (
     <Flex
       minHeight="100vh"
@@ -69,7 +73,7 @@ const AppContainer = () => {
           </Box>
           <Box className="banner-divider"></Box>
           <Box flex="2" className="address-ticker" overflow="hidden" position="relative">
-            <Box className="ticker-content" position="absolute" whiteSpace="nowrap" animation="ticker 40s linear infinite">
+            <Box className="ticker-content" position="absolute" whiteSpace="nowrap" animation={`ticker ${animationDuration} linear infinite`}>
               {duplicatedTicker.map((name, index) => (
                 <span key={index} className="ticker-item">{name}</span>
               ))}

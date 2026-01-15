@@ -15,14 +15,14 @@ export const Footer = () => {
     >
       <Box maxWidth="1200px" width="100%" margin="0 auto" px={4} display="flex" justifyContent="space-between" alignItems="center">
         <Box>
-          <Text fontSize="md" fontWeight="medium" className="courier-prime">
+          <Box fontSize="md" fontWeight="medium" className="courier-prime">
             <Flex align="center">
               <span>Made with </span>
               <Box ml={1} mt="2px">
                 <Image src={"/inline.svg"} height={3} alt="Nouns Glasses" />
               </Box>
             </Flex>
-          </Text>
+          </Box>
         </Box>
 
         <Flex direction="row" gap={4}>
