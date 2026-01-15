@@ -1,4 +1,4 @@
-import { Flex, Link, Text, Box, Image } from "@chakra-ui/react";
+import { Flex, Link, Box, Image } from "@chakra-ui/react";
 import { themeVariables } from "@/styles/themeVariables";
 import { FaTwitter } from "react-icons/fa";
 import { SiFarcaster } from "react-icons/si";
