@@ -23,7 +23,7 @@ const myTheme = merge(lightTheme(), {
 
 const config = getDefaultConfig({
   appName: "LSU",
-  projectId: "a5f353014d529c8f85633e3c6250ac28",
+  projectId: import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID || "a5f353014d529c8f85633e3c6250ac28",
   chains: [mainnet, sepolia, base, optimism, arbitrum, baseSepolia],
 });
 
