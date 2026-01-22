@@ -2,6 +2,7 @@ import axios from "axios";
 import {
   createContext,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -53,7 +54,12 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
     ...defaultContext,
   });
 
-  const initialize = async () => {
+  const setEnvError = useCallback((message: string) => {
+    toast(message, { type: "error" });
+    setState((prev) => ({ ...prev, isError: true, isLoading: false }));
+  }, []);
+
+  const initialize = useCallback(async () => {
     const isTestnet = import.meta.env.VITE_APP_IS_TESTNET === "true" || false;
     const listedName = import.meta.env.VITE_APP_LISTED_NAME;
     const listingChainName = import.meta.env.VITE_APP_LISTING_CHAIN;
@@ -61,8 +67,10 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
       import.meta.env.VITE_APP_DEFAULT_AVATAR ||
       "https://cdn.namespace.ninja/namespace.png";
 
-    //@ts-ignore
-    if (!listingChainName || !supportedChainIds[listingChainName]) {
+    if (
+      !listingChainName ||
+      !(listingChainName in supportedChainIds)
+    ) {
       setEnvError(
         `Listing chain not set in .env file. (VITE_APP_LISTING_CHAIN=mainnet). Supported chains: ${Object.keys(supportedChainIds)}`
       );
@@ -78,20 +86,20 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
 
     const listingNetwork = isTestnet ? "SEPOLIA" : "MAINNET";
     const backendUri = `https://${isTestnet ? "staging." : ""}list-manager.namespace.ninja/api/v1/listing/network/${listingNetwork}/name/${listedName}`;
-    let listingType = "L1";
+    let listingType: "L1" | "L2" = "L1";
 
     let isExpirable = false;
 
     try {
       const { data } = await axios.get<EnsListing>(backendUri);
       
-      listingType = data.type;
+      listingType = data.type?.toLowerCase() === "l2" ? "L2" : "L1";
 
       if (data.l2Metadata) {
         isExpirable = data.l2Metadata.isExpirable;
       }
 
-    } catch (err) {
+    } catch {
       setEnvError("Failed to fetch listed name for: " + listedName);
       return;
     }
@@ -103,19 +111,14 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
       isTestnet: isTestnet,
       listedName: listedName,
       listingChainId: supportedChainIds[listingChainName as SupportedChain],
-      listingType: listingType as any,
+      listingType: listingType,
       defaultAvatarUri: defaultAvatar
     });
-  };
+  }, [setEnvError]);
 
   useEffect(() => {
     initialize();
-  }, []);
-
-  const setEnvError = (message: string) => {
-    toast(message, { type: "error" });
-    setState({ ...state, isError: true, isLoading: false });
-  };
+  }, [initialize]);
 
   return <AppContext.Provider value={state}>{children}</AppContext.Provider>;
 };

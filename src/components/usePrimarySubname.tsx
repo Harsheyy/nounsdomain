@@ -41,8 +41,6 @@ export const usePrimarySubname = ({ subnames, ownerAddress }: UsePrimarySubnameP
           address: ownerAddress,
         });
 
-        console.log("Primary ENS name for address:", ownerAddress, "is:", primaryName);
-
         // Check if the primary name matches any of our subnames
         if (primaryName) {
           const matchingSubname = subnames.find(subname => 
@@ -60,8 +58,7 @@ export const usePrimarySubname = ({ subnames, ownerAddress }: UsePrimarySubnameP
           // If no primary name set, fall back to null subname
           setPrimarySubname(null);
         }
-      } catch (error) {
-        console.error("Error fetching primary ENS name:", error);
+      } catch {
         // Fall back to null subname on error
         setPrimarySubname(null);
       } finally {

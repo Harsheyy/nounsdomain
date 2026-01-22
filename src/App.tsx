@@ -28,7 +28,10 @@ function App() {
 const AppContainer = () => {
   const [view, setView] = useState("mint");
   const state = useAppConfig();
-  const { totalMinted, recentMints, isLoading: statsLoading } = useMintStats();
+  const { totalMinted, recentMints, isLoading: statsLoading } = useMintStats({
+    limit: 10,
+    refreshMs: 60000,
+  });
 
   if (state.isLoading) {
     return   <Flex flex="1" height="100vh" width="100%" alignItems="center" justifyContent="center">
@@ -41,7 +44,8 @@ const AppContainer = () => {
   }
 
   // Create ticker content with real data
-  const tickerItems = recentMints.length > 0 ? recentMints : [
+  const filteredMints = recentMints.filter((name) => name && name.trim().length > 0);
+  const tickerItems = filteredMints.length > 0 ? filteredMints : [
     "Loading..."
   ];
 

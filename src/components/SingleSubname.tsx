@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Text, Image, Input } from "@chakra-ui/react";
 import { Subname } from "./Types";
 import { useAccount, usePublicClient, useSwitchChain, useWalletClient } from "wagmi";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, encodeFunctionData, Hash, namehash, parseAbi, zeroAddress } from "viem";
 import { KnownText, KnownTexts } from "./records/TextRecords";
 import { toast, ToastContainer } from "react-toastify";
@@ -77,7 +77,7 @@ export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: 
       setTextValues(_txts);
     };
   
-    const getRecordsToUpdate = () => {
+    const getRecordsToUpdate = useCallback(() => {
       const textsToChange: { key: string; value: string }[] = [];
   
       Object.keys(textValues).forEach((txt) => {
@@ -98,13 +98,13 @@ export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: 
       });
   
       return { texts: textsToChange };
-    };
+    }, [textValues, subname.texts]);
   
     const hasRecordUpdates = useMemo(() => {
       const { texts } = getRecordsToUpdate();
   
       return texts.length > 0;
-    }, [textValues]);
+    }, [getRecordsToUpdate]);
   
     const toResolverData = () => {
       const data: Hash[] = [];
@@ -112,8 +112,6 @@ export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: 
       const nameNode = namehash(subname.name);
       const { texts } = getRecordsToUpdate();
   
-      console.log("Converting to resolver data", subname.name)
-
       texts.forEach((txt) => {
         data.push(
           encodeFunctionData({
@@ -145,18 +143,23 @@ export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: 
 
 
   
+      if (!publicClient || !walletClient || !address) {
+        sendToast("Connect your wallet to update records");
+        return;
+      }
+
       try {
-        const resp = await publicClient!!.simulateContract({
+        const resp = await publicClient.simulateContract({
           abi: parseAbi(["function multicall(bytes[] data) external"]),
           address: resolver as Address,
           functionName: "multicall",
           args: [resolverData],
-          account: address!!,
+          account: address,
         });
     
         try {
           setBtnState({waitingWallet: true, waitingTx: false})
-          const tx =  await walletClient!!.writeContract(resp.request);
+          const tx =  await walletClient.writeContract(resp.request);
           setBtnState({waitingTx: true, waitingWallet: false})
   
   
@@ -169,30 +172,29 @@ export const SingleSubname = ({subname, onUpdate}: {subname: Subname; onUpdate: 
             onUpdate()
           },3000)
   
-        } catch(err: any) {
-          console.error(err);
-          if (err.details) {
-            sendToast(err.details)
+        } catch(err) {
+          const error = err as { details?: string };
+          if (error.details) {
+            sendToast(error.details)
           }
         } finally {
           setBtnState({waitingTx: false, waitingWallet: false})
         }
     
-      } catch(err:any) {
-        if (err.details) {
-          sendToast(err.details)
-        } else if (err.response) {
-          sendToast(err.response?.data?.message)
+      } catch(err) {
+        const error = err as { details?: string; response?: { data?: { message?: string } } };
+        if (error.details) {
+          sendToast(error.details)
+        } else if (error.response) {
+          sendToast(error.response?.data?.message)
         } else {
           sendToast("Unknown error ocurred :(")
         }
-        console.error(err)
-  
       }
     };
   
-    const sendToast = (obj: any) => {
-      toast(obj,  {type: "error"});
+    const sendToast = (message?: string) => {
+      toast(message || "Unknown error occurred :(",  {type: "error"});
     }
    
     const mintBtnLabel = btnState.waitingTx ? "Waiting for tx..." : btnState.waitingWallet ? "Waiting for wallet..." : "Update"

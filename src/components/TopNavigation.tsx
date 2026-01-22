@@ -26,7 +26,7 @@ export const TopNavigation = ({ setView }: TopNavigationProps) => {
     if (!isConnected) {
       setView("mint");
     }
-  }, [isConnected]);
+  }, [isConnected, setView]);
 
   // Font sizes for responsive design
   const fontSize = useBreakpointValue({ base: "lg", md: "xl" });

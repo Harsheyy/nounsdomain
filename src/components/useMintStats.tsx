@@ -12,37 +12,37 @@ interface MintStats {
 
 import { namehash, normalize } from "viem/ens";
 
-export const useMintStats = () => {
-  const { listingChainId, listedName, listingType } = useAppConfig();
-
-  // Initialize with cached data if available
-  const [stats, setStats] = useState<MintStats>(() => {
-    try {
-      if (listedName) {
-        const cached = localStorage.getItem(`mintStats-${listedName}`);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          // Only use cache if it's less than 1 hour old
-          if (Date.now() - parsed.timestamp < 3600000) {
-            return {
-              totalMinted: parsed.totalMinted,
-              recentMints: parsed.recentMints,
-              isLoading: false, // Start with false since we have data
-              error: null
-            };
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to load cached stats", e);
-    }
-    
-    return {
-      totalMinted: 0,
-      recentMints: [],
-      isLoading: true,
-      error: null,
+type NamedItem = { name?: string | null };
+type SubgraphDomain = { name?: string | null };
+type SubgraphResponse = {
+  data?: {
+    domain?: {
+      subdomainCount?: string | number | null;
+      subdomains?: SubgraphDomain[];
     };
+    domains?: SubgraphDomain[];
+  };
+};
+
+const extractNames = (items: NamedItem[]) =>
+  items
+    .map((item) => item.name)
+    .filter((name): name is string => typeof name === "string" && name.length > 0);
+
+export const useMintStats = ({
+  limit = 7,
+  refreshMs = 60000,
+}: { limit?: number; refreshMs?: number } = {}) => {
+  const { listingChainId, listedName, listingType } = useAppConfig();
+  const ensSubgraphUrl =
+    import.meta.env.VITE_APP_ENS_SUBGRAPH_URL ||
+    "https://api.thegraph.com/subgraphs/name/ensdomains/ens";
+
+  const [stats, setStats] = useState<MintStats>({
+    totalMinted: 0,
+    recentMints: [],
+    isLoading: true,
+    error: null,
   });
 
   useEffect(() => {
@@ -51,13 +51,12 @@ export const useMintStats = () => {
 
       try {
         // Only show loading if we don't have data (count is 0)
-        if (stats.totalMinted === 0) {
-            setStats(prev => ({ ...prev, isLoading: true, error: null }));
-        }
+        setStats((prev) =>
+          prev.totalMinted === 0 ? { ...prev, isLoading: true, error: null } : prev
+        );
         
         let totalMinted = 0;
         let recentMints: string[] = [];
-        const limit = 100;
 
         if (listingType === "L1") {
           // For L1 (ENS), we fetch directly from the subgraph to ensure consistency and performance
@@ -65,7 +64,7 @@ export const useMintStats = () => {
           try {
             const parentNode = namehash(normalize(listedName));
             
-            const response = await axios.post("https://api.thegraph.com/subgraphs/name/ensdomains/ens", {
+            const response = await axios.post<SubgraphResponse>(ensSubgraphUrl, {
               query: `
                 query {
                   domain(id: "${parentNode}") {
@@ -87,14 +86,12 @@ export const useMintStats = () => {
 
             // 2. Get recent mints
             if (data?.domains && Array.isArray(data.domains)) {
-              recentMints = data.domains
-                .filter((sub: any) => sub.name)
-                .map((sub: any) => sub.name);
+              recentMints = extractNames(data.domains);
             }
             
             // Fallback: If list is empty but count > 0, try nested query (rare edge case)
             if (totalMinted > 0 && recentMints.length === 0) {
-               const nestedResponse = await axios.post("https://api.thegraph.com/subgraphs/name/ensdomains/ens", {
+               const nestedResponse = await axios.post<SubgraphResponse>(ensSubgraphUrl, {
                  query: `
                    query {
                      domain(id: "${parentNode}") {
@@ -107,35 +104,34 @@ export const useMintStats = () => {
                }, { timeout: 5000 });
                const nestedDomains = nestedResponse.data?.data?.domain?.subdomains;
                if (nestedDomains && Array.isArray(nestedDomains)) {
-                 recentMints = nestedDomains.map((d: any) => d.name);
+                 recentMints = extractNames(nestedDomains);
                }
             }
             
-          } catch (err) {
-            console.error("Failed to fetch from subgraph", err);
+          } catch {
             
             // Fallback to ENS_CLIENT if subgraph fails
             try {
-               const subnames = await ENS_CLIENT.getSubnames({
+               const subnames = (await ENS_CLIENT.getSubnames({
                 name: listedName,
                 searchString: "",
                 orderBy: "createdAt",
                 orderDirection: "desc",
                 pageSize: limit,
-              });
+              })) as NamedItem[];
               
               if (subnames && subnames.length > 0) {
-                recentMints = subnames.slice(0, limit).map((sub: any) => sub.name);
+                recentMints = extractNames(subnames.slice(0, limit));
                 totalMinted = subnames.length; // Fallback count might be capped, but better than nothing
               }
-            } catch (fallbackErr) {
-               console.error("ENS_CLIENT fallback also failed", fallbackErr);
+            } catch {
+               recentMints = [];
             }
           }
         } else {
           // For L2, use the indexer API
           const { data } = await axios.get<{
-            items: any[];
+            items: NamedItem[];
             totalItems: number;
           }>(`https://indexer.namespace.ninja/api/v1/nodes`, {
             params: {
@@ -146,16 +142,7 @@ export const useMintStats = () => {
           });
 
           totalMinted = data.totalItems || 0;
-          recentMints = data.items?.slice(0, limit).map(item => item.name) || [];
-        }
-
-        // Save to cache
-        if (totalMinted > 0) {
-            localStorage.setItem(`mintStats-${listedName}`, JSON.stringify({
-              totalMinted,
-              recentMints,
-              timestamp: Date.now()
-            }));
+          recentMints = data.items ? extractNames(data.items.slice(0, limit)) : [];
         }
 
         setStats({
@@ -165,23 +152,23 @@ export const useMintStats = () => {
           error: null,
         });
 
-      } catch (error) {
-        console.error("Error fetching mint stats:", error);
-        setStats(prev => ({
-          ...prev,
+      } catch {
+        setStats({
+          totalMinted: 0,
+          recentMints: [],
           isLoading: false,
           error: "Failed to fetch mint statistics",
-        }));
+        });
       }
     };
 
     fetchMintStats();
     
     // Refresh every 30 seconds
-    const interval = setInterval(fetchMintStats, 30000);
+    const interval = setInterval(fetchMintStats, refreshMs);
     
     return () => clearInterval(interval);
-  }, [listingChainId, listedName, listingType]);
+  }, [listingChainId, listedName, listingType, limit, refreshMs, ensSubgraphUrl]);
 
   return stats;
 };

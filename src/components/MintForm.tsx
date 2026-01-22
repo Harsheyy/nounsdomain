@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -129,7 +129,7 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
     }
     try {
       normalize(_value);
-    } catch (err) {
+    } catch {
       return;
     }
     setLabel(_value);
@@ -142,18 +142,24 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
     }
   };
 
-  const check = async (label: string) => {
+  const check = useCallback(async (label: string) => {
     const subnameAvailable = await checkAvailable(label);
     setIndicators({
       available: subnameAvailable,
       checking: false,
     });
-  };
+  }, [checkAvailable]);
 
-  const debouncedCheck = useCallback(
-    debounce((label) => check(label), 200),
-    []
+  const debouncedCheck = useMemo(
+    () => debounce((value: string) => check(value), 200),
+    [check]
   );
+
+  useEffect(() => {
+    return () => {
+      debouncedCheck.cancel();
+    };
+  }, [debouncedCheck]);
 
   const handleMint = async () => {
     if (!address) {
@@ -183,7 +189,7 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
         },
         label: label,
         parentName: listedName,
-        owner: address!,
+        owner: address,
       });
 
       const tx = await executeTx(params, address);
@@ -196,14 +202,19 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
       
       // Keep success screen visible until user interaction
       // No auto-hide or auto-navigation - user must now explicitly choose to navigate away
-    } catch (err: any) {
-      console.error(err);
-      if (err?.cause?.details?.includes("User denied transaction signatur")) {
+    } catch (err) {
+      const error = err as {
+        cause?: { details?: string };
+        message?: string;
+        details?: string;
+        response?: { data?: { message?: string } };
+      };
+      if (error?.cause?.details?.includes("User denied transaction signatur")) {
         return;
-      } else if (err?.cause?.details?.includes("insufficient funds for")) {
+      } else if (error?.cause?.details?.includes("insufficient funds for")) {
         setMintError(`Insufficient balance`);
       } else {
-        parseError(err?.message || "");
+        parseError(error?.message || "");
       }
     } finally {
       setMintIndicator({ btnLabel: "Register", waiting: false });
@@ -243,6 +254,16 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
   const subHeadlineFontSize = useBreakpointValue({ base: "16px", md: "22px" });
 
   const handlePrimaryName = async () => {
+    if (!address) {
+      openConnectModal?.();
+      return;
+    }
+
+    if (!publicClient || !walletClient) {
+      toast("Wallet connection is not ready yet.", { type: "error" });
+      return;
+    }
+
     if (chainId !== chainForPrimaryName) {
       await switchChainAsync({ chainId: chainForPrimaryName });
     }
@@ -253,16 +274,16 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
         waiting: true,
       });
 
-      const resp = await publicClient!!.simulateContract({
+      const resp = await publicClient.simulateContract({
         abi: reverseRegistarAbi,
         address: reverseRegistar,
         functionName: "setName",
         args: [`${label}.${listedName}`],
-        account: address!!,
+        account: address,
       });
 
       try {
-        const tx = await walletClient!!.writeContract(resp.request);
+        const tx = await walletClient.writeContract(resp.request);
         setPrimaryNameIndicators({ btnLabel: "Processing", waiting: true });
 
         await publicClient?.waitForTransactionReceipt({
@@ -276,18 +297,25 @@ export const MintForm = ({ onSuccessfulMint }: MintFormProps) => {
           closeButton: false,
           autoClose: 1500,
         });
-      } catch (err: any) {
-        if (err.details) {
-          toast(err.details, { type: "error" });
+      } catch (err) {
+        const error = err as {
+          details?: string;
+          response?: { data?: { message?: string } };
+        };
+        if (error.details) {
+          toast(error.details, { type: "error" });
         }
       }
-    } catch (err: any) {
-      if (err.details) {
-        toast(err.details, { type: "error" });
-      } else if (err.response) {
-        toast(err.response?.data?.message, { type: "error" });
+    } catch (err) {
+      const error = err as {
+        details?: string;
+        response?: { data?: { message?: string } };
+      };
+      if (error.details) {
+        toast(error.details, { type: "error" });
+      } else if (error.response) {
+        toast(error.response?.data?.message, { type: "error" });
       } else {
-        console.log(err);
         toast("Unknown error occurred :(", { type: "error" });
       }
     } finally {

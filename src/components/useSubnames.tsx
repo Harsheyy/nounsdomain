@@ -41,8 +41,6 @@ const fetchL1Subnames = async (owner: Address, parentName: string) => {
       return [];
     }
 
-    console.log("Filtered subnames:", filteredSubnames);
-
     const subnamesWithRecords = [];
 
     for (const subname of filteredSubnames) {
@@ -87,8 +85,7 @@ const fetchL1Subnames = async (owner: Address, parentName: string) => {
     }
 
     return subnamesWithRecords;
-  } catch (error) {
-    console.error("Error fetching L1 subnames:", error);
+  } catch {
     return [];
   }
 };
@@ -138,8 +135,7 @@ export const useSubnames = ({
           items: res,
         });
       })
-      .catch((err) => {
-        console.error(err)
+      .catch(() => {
         setState({
           isFetching: false,
           isL1Subnames: subnameType === "L1",
@@ -163,8 +159,7 @@ export const useSubnames = ({
           items: res,
         });
       })
-      .catch((err) => {
-        console.error(err)
+      .catch(() => {
         setState({
           isFetching: false,
           isL1Subnames: subnameType === "L1",
