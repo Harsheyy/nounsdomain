@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import { Address, Hash } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import {
@@ -38,15 +39,54 @@ export const useNamepsaceClient = () => {
   const publicClient = usePublicClient({ chainId: listingChainId });
   const { data: walletClient } = useWalletClient({ chainId: listingChainId });
 
-  const checkAvailable = async (label: string) => {
-    if (listingType === "L1") {
-      return mintClient.isL1SubnameAvailable(`${label}.${listedName}`);
-    }
-    return mintClient.isL2SubnameAvailable(
-      `${label}.${listedName}`,
-      listingChainId
-    );
-  };
+  const availabilityCache = useRef(
+    new Map<string, { value: boolean; timestamp: number }>()
+  );
+  const inflightChecks = useRef(new Map<string, Promise<boolean>>());
+
+  const checkAvailable = useCallback(
+    async (label: string) => {
+      if (!label || !listedName) return false;
+      const fullName = `${label}.${listedName}`;
+      const now = Date.now();
+      const cached = availabilityCache.current.get(fullName);
+      if (cached && now - cached.timestamp < 30000) {
+        return cached.value;
+      }
+      const inflight = inflightChecks.current.get(fullName);
+      if (inflight) {
+        return inflight;
+      }
+      const checkPromise = (async () => {
+        try {
+          const timeoutMs = 5000;
+          const timeoutPromise = new Promise<boolean>((resolve) =>
+            setTimeout(() => resolve(false), timeoutMs)
+          );
+          const availabilityPromise =
+            listingType === "L1"
+              ? mintClient.isL1SubnameAvailable(fullName)
+              : mintClient.isL2SubnameAvailable(fullName, listingChainId);
+          const result = await Promise.race([availabilityPromise, timeoutPromise]);
+          availabilityCache.current.set(fullName, {
+            value: result,
+            timestamp: Date.now(),
+          });
+          return result;
+        } catch {
+          if (cached) {
+            return cached.value;
+          }
+          return false;
+        } finally {
+          inflightChecks.current.delete(fullName);
+        }
+      })();
+      inflightChecks.current.set(fullName, checkPromise);
+      return checkPromise;
+    },
+    [listingChainId, listingType, listedName]
+  );
 
   const mintParameters = async (req: MintTransactionRequest) => {
     return mintClient.getMintTransactionParameters(req);
