@@ -11,6 +11,7 @@ import { ReferralProvider } from "./components/ReferralContext";
 import { AppContextProvider, useAppConfig } from "./components/AppConfigContext";
 import { ToastContainer } from "react-toastify";
 import { useMintStats } from "./components/useMintStats";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
 
 function App() {
   return (
@@ -32,6 +33,28 @@ const AppContainer = () => {
     limit: 10,
     refreshMs: 60000,
   });
+  const isPrivacyRoute = window.location.pathname === "/privacy";
+
+  const handleSetView = (nextView: string) => {
+    if (window.location.pathname === "/privacy") {
+      window.history.pushState({}, "", "/");
+    }
+    setView(nextView);
+  };
+
+  if (isPrivacyRoute) {
+    return (
+      <Flex minHeight="100vh" flexDirection="column" bg={themeVariables.main}>
+        <Box>
+          <TopNavigation setView={handleSetView} />
+        </Box>
+        <Box flex="1" width="100%">
+          <PrivacyPolicy />
+        </Box>
+        <Footer />
+      </Flex>
+    );
+  }
 
   if (state.isLoading) {
     return   <Flex flex="1" height="100vh" width="100%" alignItems="center" justifyContent="center">
@@ -63,7 +86,7 @@ const AppContainer = () => {
       bg={themeVariables.main}
     >
       <Box>
-        <TopNavigation setView={setView} />
+        <TopNavigation setView={handleSetView} />
       </Box>
       <Box className="ticker-container" width="100%" py="15px" bg="#fff" borderBottom="1px solid #e0e0e0">
         <Box maxWidth="1200px" margin="0 auto" px={4} display="flex" width="100%">
@@ -88,9 +111,9 @@ const AppContainer = () => {
       <Flex flex="1" width="100%" alignItems="center" justifyContent="center">
         {view === "mint" ? 
           <MintForm onSuccessfulMint={() => {
-            setView("mynames");
+            handleSetView("mynames");
           }} /> : 
-          <MySubnames setView={setView} />}
+          <MySubnames setView={handleSetView} />}
       </Flex>
       <Footer />
     </Flex>
