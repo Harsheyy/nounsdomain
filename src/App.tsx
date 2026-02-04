@@ -33,10 +33,11 @@ const AppContainer = () => {
     limit: 10,
     refreshMs: 60000,
   });
-  const isPrivacyRoute = window.location.pathname === "/privacy";
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+  const isPrivacyRoute = pathname === "/privacy";
 
   const handleSetView = (nextView: string) => {
-    if (window.location.pathname === "/privacy") {
+    if (pathname === "/privacy") {
       window.history.pushState({}, "", "/");
     }
     setView(nextView);

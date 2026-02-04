@@ -21,12 +21,25 @@ export const TopNavigation = ({ setView }: TopNavigationProps) => {
   const { openConnectModal } = useConnectModal();
   const { isConnected } = useAccount();
   const [isCopied, setIsCopied] = useState(false);
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+  const isPrivacyRoute = pathname === "/privacy";
+
+  const handleLogoClick = () => {
+    setIsCopied(true);
+    navigator.clipboard.writeText("⌐◨-◨");
+    setTimeout(() => setIsCopied(false), 2000);
+    window.history.pushState({}, "", "/");
+    setView("mint");
+  };
 
   useEffect(() => {
+    if (isPrivacyRoute) {
+      return;
+    }
     if (!isConnected) {
       setView("mint");
     }
-  }, [isConnected, setView]);
+  }, [isConnected, isPrivacyRoute, setView]);
 
   // Font sizes for responsive design
   const fontSize = useBreakpointValue({ base: "lg", md: "xl" });
@@ -48,12 +61,8 @@ export const TopNavigation = ({ setView }: TopNavigationProps) => {
         px={4}
       >
         <Grid templateColumns="auto auto" alignItems="center">
-          <Link textDecoration="none" onClick={() => setView("mint")}>
-            <Image src={"/inline.svg"} height={4} onClick={() => {
-              setIsCopied(true);
-              navigator.clipboard.writeText("⌐◨-◨");
-              setTimeout(() => setIsCopied(false), 2000);
-            }} />{" "}
+          <Link textDecoration="none" onClick={handleLogoClick}>
+            <Image src={"/inline.svg"} height={4} />{" "}
             {/* when copied is clicked a black banner slightly tilted upwards with boxshadow will show for few seconds*/}
             { isCopied && (
               <Box
